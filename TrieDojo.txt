@@ -1,0 +1,109 @@
+class AutoComplete {
+    
+    private TrieDataNode root;
+    
+    public AutoComplete() {
+        root = new TrieDataNode('-');
+    }
+    private List<String> foundWords = new ArrayList();
+    // This is complete
+    public void addWord(String wordToAdd) {
+        TrieDataNode n = root, tmp;
+        for (char c : wordToAdd.toCharArray()) {
+            tmp = n.getChildWithChar(c);
+            if (tmp == null) {
+                tmp = new TrieDataNode(c);
+                n.addChild(tmp);
+            }
+            n = tmp;
+        }
+        TrieDataNode endNode = new TrieDataNode('*');
+        endNode.setTerminating(true);
+        n.addChild(endNode);
+    }
+
+    public List<String> autoComplete(String baseChars) {
+        char[] baseArray = baseChars.toCharArray();
+        TrieDataNode node = root;
+        boolean notFound = false;
+        String tempWord = "";
+
+        for (char a : baseArray) {
+            if (node.getChildWithChar(a) == null) {
+                notFound = true;
+                break;
+            }
+            tempWord += node.getChildWithChar(a).getData();
+            node = node.getChildWithChar(a);
+            
+        }
+        if (notFound) {
+            foundWords.add("");
+            return foundWords;
+        }
+
+        suggestion(node, tempWord);
+        
+
+        return foundWords;
+    }
+
+    private void suggestion(TrieDataNode node, String word) {
+        if (node.isTerminating()) {
+            foundWords.add(word.substring(0, word.length()-1));
+        }
+        for (TrieDataNode child : node.getChildren()) {
+            suggestion(child, word+child.getData());
+        }
+    }
+
+}
+
+class TrieDataNode {
+
+    private char data;
+    private boolean isTerminating;
+    private final List<TrieDataNode> children = new ArrayList<>();
+
+    public TrieDataNode(char data) {
+        this.data = data;
+    }
+
+    public char getData() {
+        return data;
+    }
+
+    public void addChild(TrieDataNode newNode) {
+        children.add(newNode);
+    }
+
+    public List<TrieDataNode> getChildren() {
+        return children;
+    }
+
+    public TrieDataNode getChildWithChar(char c) {
+        for (TrieDataNode child : children) {
+            if (Character.toLowerCase(child.getData()) == Character.toLowerCase(c)) {
+                return child;
+            }
+        }
+        return null;
+    }
+
+    public boolean isTerminating() {
+        return isTerminating;
+    }
+
+    public void setTerminating(boolean terminating) {
+        isTerminating = terminating;
+    }
+
+    @Override
+    public String toString() {
+        return Character.toString(data);
+    }
+}
+
+
+
+
